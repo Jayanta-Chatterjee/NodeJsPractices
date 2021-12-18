@@ -20,5 +20,9 @@
   "homepage": "https://github.com/Jayanta-Chatterjee/NodeJsPractices#readme",
   "devDependencies": {
     "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2"
   }
 }
