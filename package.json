@@ -1,0 +1,24 @@
+{
+  "name": "nodejs_practice",
+  "version": "1.0.0",
+  "description": "Complete NodeJS guide",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "fire": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jayanta-Chatterjee/NodeJsPractices.git"
+  },
+  "author": "Jayanta Chatterjee",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jayanta-Chatterjee/NodeJsPractices/issues"
+  },
+  "homepage": "https://github.com/Jayanta-Chatterjee/NodeJsPractices#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

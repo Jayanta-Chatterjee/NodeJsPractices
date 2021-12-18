@@ -33,4 +33,6 @@ const requestHandler=(req,res)=>{
       res.write("</html>");
       res.end();
 };
-module.exports=requestHandler;
+// module.exports=requestHandler;
+exports.handler=requestHandler;
+exports.message="Welcome to NodeJS";
