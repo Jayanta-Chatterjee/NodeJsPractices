@@ -1,9 +1,9 @@
-<%- include('includes/head.ejs')%>
+<%- include('../includes/head.ejs')%>
 <link rel="stylesheet" href="/css/product.css">
 
 </head>
 <body>
-    <%- include('includes/navigation.ejs')%>
+    <%- include('../includes/navigation.ejs')%>
 
     <main>        
         <% if(prods.length>0) {%>
@@ -14,14 +14,17 @@
                     <h1 class="product__title"><%=product.title%></h1>
                 </header>
                 <div class="card__image">
-                    <img src="https://media.wired.com/photos/5be4cd03db23f3775e466767/master/pass/books-521812297.jpg" alt="A Book">
+                    <img src="<%=product.imageUrl%>" alt="A Book">
                 </div>
                 <div class="card__content">
-                    <h2 class="product__price">$19.99</h2>
-                    <p class="product__description">A very interesting book about so many even more interesting things!</p>
+                    <h2 class="product__price">$<%=product.price%></h2>
+                    <p class="product__description"><%=product.description%></p>
                 </div>
                 <div class="card__actions">
-                    <button class="btn">Add to Cart</button>
+                    <form action="/add-to-cart" method="post">
+                        <button class="btn">Add to Cart</button>
+
+                    </form>
                 </div>
             </article>
            <%}%>
@@ -30,4 +33,4 @@
             <h1>No products found!</h1>
             <%}%>
     </main>
-<%- include('includes/end.ejs')%>
+<%- include('../includes/end.ejs')%>
