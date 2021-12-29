@@ -10,8 +10,8 @@
                     <%=prods.title%>
                 </h1>
                 <hr>
-                <div>
-                    <img src="<%=prods.imageUrl%>" alt="A Book">
+                <div class="image">
+                    <img  src="<%=prods.imageUrl%>" alt="A Book">
 
                 </div>
                 <h2>$<%=prods.price%>
@@ -19,7 +19,7 @@
                 <p>
                     <%=prods.description%>
                 </p>
-                <%- include('../includes/add-to-cart.ejs',{product:product})%>
+                <%- include('../includes/add-to-cart.ejs',{product:prods})%>
 
 
             </main>
