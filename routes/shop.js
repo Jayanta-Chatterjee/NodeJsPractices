@@ -12,7 +12,8 @@ shopRouter.get("/products/:productId",shopController.getProductDetails);
 shopRouter.get("/cart",shopController.getCart);
 shopRouter.post("/cart",shopController.postCart);
 
-shopRouter.get("/order",shopController.getOrders);
-shopRouter.get("/checkout",shopController.getCheckout);
+shopRouter.get("/orders",shopController.getOrders);
+
 shopRouter.post("/delete-cart",shopController.postDeleteCart);
+shopRouter.post("/create-order",shopController.postOrderCreate);
 module.exports = shopRouter;
