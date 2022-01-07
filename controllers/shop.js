@@ -8,6 +8,8 @@ exports.getAllProducts = (req, res, next) => {
         prods: products,
         docTitle: "My Shop",
         path: "/products",
+    isAuthenticated:req.session.isLoggedIn
+
       });
     })
     .catch((err) => {
@@ -22,17 +24,22 @@ exports.getProductDetails = (req, res, next) => {
         prods: product,
         docTitle: product.title,
         path: "/products",
+    isAuthenticated:req.session.isLoggedIn
+
       });
     })
     .catch((err) => console.log(err));
 };
 exports.getIndex = (req, res, next) => {
+
   Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         docTitle: "My Shop",
         path: "/shop",
+    isAuthenticated:req.session.isLoggedIn
+
       });
     })
     .catch((err) => {
@@ -49,6 +56,8 @@ exports.getCart = (req, res, next) => {
         docTitle: "My cart",
         path: "/cart",
         products: products,
+    isAuthenticated:req.session.isLoggedIn
+
       });
     })
     .catch((err) => console.log(err));
@@ -81,7 +90,7 @@ exports.postOrderCreate = (req, res, next) => {
     .populate("cart.items.productId")
     .then((user) => {
       const products = user.cart.items.map((i) => {
-        return { quantity: i.quantity, product: {...i.productId._doc} };
+        return { quantity: i.quantity, product: { ...i.productId._doc } };
       });
       const order = new Order({
         user: { name: req.user.name, userId: req.user },
@@ -91,21 +100,22 @@ exports.postOrderCreate = (req, res, next) => {
     })
     .then((result) => {
       return req.user.clearCart();
-      
     })
-    .then(result=>{
+    .then((result) => {
       res.redirect("/orders");
     })
     .catch((err) => console.log(err));
 };
 exports.getOrders = (req, res, next) => {
-  Order.find({"user.userId":req.user._id})    
-    .then((orders) => {
-      console.log(orders);
+  
+  Order.find({ "user.userId": req.user._id })
+    .then((orders) => {      
       res.render("shop/order", {
         docTitle: "My Order",
         path: "/orders",
-        orders: orders,
+        orders: orders,   
+    isAuthenticated:req.session.isLoggedIn
+
       });
     })
     .catch((err) => {
