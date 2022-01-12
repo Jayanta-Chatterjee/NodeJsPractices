@@ -7,9 +7,7 @@ exports.getAllProducts = (req, res, next) => {
       res.render("shop/product-list", {
         prods: products,
         docTitle: "My Shop",
-        path: "/products",
-    isAuthenticated:req.session.isLoggedIn
-
+        path: "/products",        
       });
     })
     .catch((err) => {
@@ -23,23 +21,18 @@ exports.getProductDetails = (req, res, next) => {
       res.render("shop/product-detail", {
         prods: product,
         docTitle: product.title,
-        path: "/products",
-    isAuthenticated:req.session.isLoggedIn
-
+        path: "/products",        
       });
     })
     .catch((err) => console.log(err));
 };
 exports.getIndex = (req, res, next) => {
-
   Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
         docTitle: "My Shop",
-        path: "/shop",
-    isAuthenticated:req.session.isLoggedIn
-
+        path: "/shop"
       });
     })
     .catch((err) => {
@@ -55,9 +48,7 @@ exports.getCart = (req, res, next) => {
       res.render("shop/cart", {
         docTitle: "My cart",
         path: "/cart",
-        products: products,
-    isAuthenticated:req.session.isLoggedIn
-
+        products: products,        
       });
     })
     .catch((err) => console.log(err));
@@ -107,15 +98,12 @@ exports.postOrderCreate = (req, res, next) => {
     .catch((err) => console.log(err));
 };
 exports.getOrders = (req, res, next) => {
-  
   Order.find({ "user.userId": req.user._id })
-    .then((orders) => {      
+    .then((orders) => {
       res.render("shop/order", {
         docTitle: "My Order",
         path: "/orders",
-        orders: orders,   
-    isAuthenticated:req.session.isLoggedIn
-
+        orders: orders,        
       });
     })
     .catch((err) => {

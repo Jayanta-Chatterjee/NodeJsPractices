@@ -4,6 +4,9 @@ const bodyParser = require("body-parser");
 // var exphbs  = require('express-handlebars');
 const mongoose = require("mongoose");
 const session = require("express-session");
+const csrf = require("csurf");
+const flash=require('connect-flash');
+
 const mongoDbSession = require("connect-mongodb-session")(session);
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
@@ -21,6 +24,8 @@ const storeDb = new mongoDbSession({
   uri: MONGODB_URI,
   collection: "sessions",
 });
+const csrfProtection = csrf();
+
 // const hbs=exphbs.create({ extname:'hbs', layoutsDir:'views/layouts', defaultLayout:'main-layouts' });
 // app.engine('hbs', hbs.engine);
 app.set("view engine", "ejs");
@@ -40,6 +45,8 @@ app.use(
     store: storeDb,
   })
 );
+app.use(csrfProtection);
+app.use(flash());
 
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -61,6 +68,11 @@ app.use((req, res, next) => {
   // });
   // user.save();
   // next();
+});
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  next();
 });
 
 app.use("/admin", adminRoutes);
