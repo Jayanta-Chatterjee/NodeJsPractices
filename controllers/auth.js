@@ -1,3 +1,5 @@
+const crypto=require('crypto');
+
 const bcrypt = require("bcryptjs");
 
 const User = require("../models/user");
@@ -105,3 +107,26 @@ exports.postSignup = (req, res, next) => {
       console.log(err);
     });
 };
+exports.getReset=(req,res,next)=>{
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+  res.render("auth/reset", {
+    docTitle: "Reset Password",
+    path: "/reset",
+    errorMessage:message
+  });
+};
+exports.postReset=(req,res,next)=>{
+  crypto.randomBytes(32,(err,buffer)=>{
+    if (err) {
+      console.log(err);
+      res.redirect('/reset');
+    }
+    const token=buffer.toString('hex');
+    
+  })
+}
