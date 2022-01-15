@@ -1,5 +1,7 @@
 const Product = require("../models/product");
 const { validationResult } = require("express-validator/check");
+const mongoose = require("mongoose");
+
 exports.GetAddProducts = (req, res, next) => {
   // res.sendFile(path.join(rootDir,'views','add-product'));
   res.render("admin/edit-product", {
@@ -9,7 +11,7 @@ exports.GetAddProducts = (req, res, next) => {
     errorMessage: "",
     oldInput: { title: "", price: "", description: "", imageUrl: "" },
     validationErros: [],
-    hasError:false
+    hasError: false,
   });
 };
 exports.GetEditProducts = (req, res, next) => {
@@ -42,6 +44,7 @@ exports.postAddProduct = (req, res, next) => {
   const price = req.body.price;
   const description = req.body.description;
   const prod = new Product({
+    // _id:new mongoose.Types.ObjectId("61d70331764ee40c6292a42a"),
     title: title,
     price: price,
     description: description,
@@ -82,10 +85,13 @@ exports.postAddProduct = (req, res, next) => {
         },
         validationErros: [],
         hasError: false,
-
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const myError = new Error(err);
+      myError.httpStatusCode = 500;
+      return next(myError);
+    });
 };
 
 exports.getAdminProducts = (req, res, next) => {
@@ -97,7 +103,11 @@ exports.getAdminProducts = (req, res, next) => {
         path: "/admin/products",
       });
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const myError = new Error(err);
+      myError.httpStatusCode = 500;
+      return next(myError);
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -118,7 +128,7 @@ exports.postEditProduct = (req, res, next) => {
         price: price,
         description: description,
         imageUrl: imageUrl,
-        _id:req.body.id
+        _id: req.body.id,
       },
       hasError: true,
       validationErros: errors.array(),
@@ -139,7 +149,11 @@ exports.postEditProduct = (req, res, next) => {
       });
     })
 
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const myError = new Error(err);
+      myError.httpStatusCode = 500;
+      return next(myError);
+    });
 };
 exports.postDeleteProdut = (req, res, next) => {
   const productId = req.body.id;
@@ -148,5 +162,9 @@ exports.postDeleteProdut = (req, res, next) => {
       console.log("Deleted Successfully!");
       res.redirect("/admin/products");
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const myError = new Error(err);
+      myError.httpStatusCode = 500;
+      return next(myError);
+    });
 };
