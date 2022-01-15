@@ -17,8 +17,7 @@ router.post(
     body("title", "Title should be alphanumeric only and length >3")
       .isString()
       .isLength({ min: 3 })
-      .trim(),
-    body("imageUrl").isURL().withMessage("Invalid image Url."),
+      .trim(),    
     body("price").isFloat(),
     body("description").isLength({ min: 5 }).trim(),
   ],
@@ -30,8 +29,7 @@ router.post("/edit-product",[
     body("title", "Title should be alphanumeric only")
       .isString()
       .isLength({ min: 3 })
-      .trim(),
-    body("imageUrl").isURL().withMessage("Invalid image Url."),
+      .trim(),    
     body("price").isFloat(),
     body("description").isLength({ min: 5 }).trim(),
   ], isAuth, adminController.postEditProduct);

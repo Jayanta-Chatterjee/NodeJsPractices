@@ -5,8 +5,24 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const session = require("express-session");
 const csrf = require("csurf");
-const flash=require('connect-flash');
+const flash = require("connect-flash");
+const multer = require("multer");
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "images");
+  },
+  filename: (req, file, cb) => {
+    cb(null, new Date().toISOString().replace(/:/g, '-') + "-" + file.originalname);
+  },
+});
 
+const fileFilters=(req,file,cb)=>{
+  if (file.mimetype==='image/jpg' || file.mimetype==='image/png' || file.mimetype==='image/jpeg') {
+    cb(null,true);
+  }else{
+    cb(null,false);
+  } 
+}
 const mongoDbSession = require("connect-mongodb-session")(session);
 const adminRoutes = require("./routes/admin");
 const shopRouter = require("./routes/shop");
@@ -36,7 +52,10 @@ app.set("view engine", "ejs");
 app.set("views", "views");
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(multer({ storage: fileStorage,fileFilter:fileFilters }).single("image"));
+
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/images',express.static(path.join(__dirname, "images")));
 app.use(
   session({
     secret: "my secret",
@@ -79,11 +98,11 @@ app.use("/admin", adminRoutes);
 app.use(shopRouter);
 app.use(authRouter);
 
-app.use('/500',errorController.get500);
+app.use("/500", errorController.get500);
 app.use(errorController.get404);
 
-app.use((error,req,res,next)=>{
-  res.redirect('/500');
+app.use((error, req, res, next) => {
+  res.redirect("/500");
 });
 
 let port = process.env.PORT || 3000;
