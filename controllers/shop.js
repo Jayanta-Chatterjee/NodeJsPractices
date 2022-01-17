@@ -1,18 +1,34 @@
 const fs = require("fs");
 const path = require("path");
-const PDFDocument=require('pdfkit');
+const PDFDocument = require("pdfkit");
+
+const ITEMS_PER_PAGE = 2;
 
 const Product = require("../models/product");
 const Order = require("../models/order");
-const fileHelper=require('../util/file');
+const fileHelper = require("../util/file");
+const Pagination = require("../models/pagination");
 
 exports.getAllProducts = (req, res, next) => {
+  const page = +req.query.page || 1;
+
+  let totalItems;
   Product.find()
+  .countDocuments()
+  .then(totalDocs=>{
+    totalItems=totalDocs;
+    return Product.find()
+    .skip((page - 1) * ITEMS_PER_PAGE)
+    .limit(ITEMS_PER_PAGE);
+  })
     .then((products) => {
+      let pagination = new Pagination(totalItems,page,ITEMS_PER_PAGE);             
+
       res.render("shop/product-list", {
         prods: products,
         docTitle: "My Shop",
         path: "/products",
+        pagination:pagination
       });
     })
     .catch((err) => {
@@ -36,15 +52,27 @@ exports.getProductDetails = (req, res, next) => {
     });
 };
 exports.getIndex = (req, res, next) => {
+  const page = +req.query.page || 1;
+  let totalItems;
   Product.find()
+    .countDocuments()
+    .then((totalDocs) => {
+      totalItems = totalDocs;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
+      let pagination = new Pagination(totalItems,page,ITEMS_PER_PAGE);             
       res.render("shop/index", {
         prods: products,
         docTitle: "My Shop",
         path: "/shop",
+        pagination:pagination
       });
     })
     .catch((err) => {
+      console.log(err);
       const myError = new Error(err);
       myError.httpStatusCode = 500;
       return next(myError);
@@ -142,16 +170,16 @@ exports.getInvoice = (req, res, next) => {
   Order.findById(orderId)
     .then((order) => {
       if (!order) {
-        console.log('no order');
+        console.log("no order");
         return next(new Error("Invoice Order Id"));
       }
       if (order.user.userId.toString() !== req.user._id.toString()) {
-        console.log('Unauthorized');
+        console.log("Unauthorized");
         return next(new Error("Unauthorized."));
       }
       const invoiceName = "test-" + orderId + ".pdf";
       const invoicePath = path.join("data", "Invoices", invoiceName);
-      const pdfDoc=new PDFDocument();
+      const pdfDoc = new PDFDocument();
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
@@ -159,26 +187,26 @@ exports.getInvoice = (req, res, next) => {
       );
       pdfDoc.pipe(fs.createWriteStream(invoicePath));
       pdfDoc.pipe(res);
-      pdfDoc.fontSize(26).text('Invoice', {
-        underline: true
+      pdfDoc.fontSize(26).text("Invoice", {
+        underline: true,
       });
-      pdfDoc.text('-----------------------');
+      pdfDoc.text("-----------------------");
       let totalPrice = 0;
-      order.products.forEach(prod => {
+      order.products.forEach((prod) => {
         totalPrice += prod.quantity * prod.product.price;
         pdfDoc
           .fontSize(14)
           .text(
             prod.product.title +
-              ' - ' +
+              " - " +
               prod.quantity +
-              ' x ' +
-              '$' +
+              " x " +
+              "$" +
               prod.product.price
           );
       });
-      pdfDoc.text('---');
-      pdfDoc.fontSize(20).text('Total Price: $' + totalPrice);
+      pdfDoc.text("---");
+      pdfDoc.fontSize(20).text("Total Price: $" + totalPrice);
 
       pdfDoc.end();
       // fs.readFile(invoicePath, (err, data) => {
@@ -193,7 +221,7 @@ exports.getInvoice = (req, res, next) => {
       //   res.send(data);
       // });
       // const file=fs.createReadStream(invoicePath);
-       
+
       //   file.pipe(res);
     })
     .catch((err) => next(err));

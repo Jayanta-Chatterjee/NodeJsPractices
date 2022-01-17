@@ -1,0 +1,25 @@
+<section class="pagination">
+    <% if(pagination.CurrentPage!==1 && pagination.PreviousPage!==1) {%>
+        <a href="?page=1">1</a>
+    <%}%>
+    <% if(pagination.HasPreviousPage){ %>
+        <a href="?page=<%= pagination.PreviousPage %>">
+            <%=pagination.PreviousPage %>
+        </a>
+    <%}%>
+    <a href="?page=<%= pagination.CurrentPage %>" class="active">
+        <%=pagination.CurrentPage%>
+    </a>
+    <% if(pagination.HasNextPage){ %>
+        <a href="?page=<%= pagination.NextPage %>">
+            <%=pagination.NextPage%>
+        </a>
+    <%}%>
+    <% if(pagination.LastPage!==pagination.CurrentPage &&
+        pagination.NextPage!=pagination.LastPage) { %>
+        <a href="?page=<%= pagination.LastPage %>">
+            <%=pagination.LastPage%>
+        </a>
+    <%}%>
+
+</section>
