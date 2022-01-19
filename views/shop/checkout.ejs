@@ -1,0 +1,41 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/cart.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+            <main>
+                <ul class="cart__item-list">
+                    <% products.forEach(p=> { %>
+                        <li class="cart__item">
+                            <h1>
+                                <%= p.productId.title %>
+                            </h1>
+                            <h2>Quantity: <%= p.quantity %>
+                            </h2>
+                        </li>
+                        <% }) %>
+                </ul>
+                <div class="centered">
+                    <h2>Total: <%= total%>
+                    </h2>
+                    <form action="/create-order" method="POST">
+                        <input type="hidden" name="total" value="<%=total%>">
+                        <input type="hidden" name="_csrf" value="<%=csrfToken %>">                       
+                        <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                        data-key="pk_test_51KJeb8SIhcssQQUHDE4tYHbMhTAndSmKDjQ2lGQuA9oq0iviMawOgY8FV7OF160Nux7Nc74L3xo4B56gF2BJEjNs00mEyNuIGu"
+                        data-amount="<%=total *100 %>"
+                        data-name="demo-site"
+                        data-description="this is for testing"
+                        data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                        data-locale="auto"
+                        data-currency="usd"
+                    >
+
+                        </script>
+                    </form>
+                </div>
+            </main>
+            <%- include('../includes/end.ejs') %>

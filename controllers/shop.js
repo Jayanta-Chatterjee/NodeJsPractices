@@ -1,6 +1,9 @@
 const fs = require("fs");
 const path = require("path");
 const PDFDocument = require("pdfkit");
+const stripe = require("stripe")(
+  "sk_test_51KJeb8SIhcssQQUHB8tMJWbLuqaC48yCXkN7GZs66kx8hdvwipqsfer9NqErT4BFcfYd33lGsJFHzdBN5MSYpFO700w9y7Kk4z"
+);
 
 const ITEMS_PER_PAGE = 2;
 
@@ -14,21 +17,21 @@ exports.getAllProducts = (req, res, next) => {
 
   let totalItems;
   Product.find()
-  .countDocuments()
-  .then(totalDocs=>{
-    totalItems=totalDocs;
-    return Product.find()
-    .skip((page - 1) * ITEMS_PER_PAGE)
-    .limit(ITEMS_PER_PAGE);
-  })
+    .countDocuments()
+    .then((totalDocs) => {
+      totalItems = totalDocs;
+      return Product.find()
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+    })
     .then((products) => {
-      let pagination = new Pagination(totalItems,page,ITEMS_PER_PAGE);             
+      let pagination = new Pagination(totalItems, page, ITEMS_PER_PAGE);
 
       res.render("shop/product-list", {
         prods: products,
         docTitle: "My Shop",
         path: "/products",
-        pagination:pagination
+        pagination: pagination,
       });
     })
     .catch((err) => {
@@ -63,12 +66,12 @@ exports.getIndex = (req, res, next) => {
         .limit(ITEMS_PER_PAGE);
     })
     .then((products) => {
-      let pagination = new Pagination(totalItems,page,ITEMS_PER_PAGE);             
+      let pagination = new Pagination(totalItems, page, ITEMS_PER_PAGE);
       res.render("shop/index", {
         prods: products,
         docTitle: "My Shop",
         path: "/shop",
-        pagination:pagination
+        pagination: pagination,
       });
     })
     .catch((err) => {
@@ -82,12 +85,33 @@ exports.getCart = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .then((user) => {
-      console.log(user.cart.items);
       let products = user.cart.items;
       res.render("shop/cart", {
         docTitle: "My cart",
         path: "/cart",
         products: products,
+      });
+    })
+    .catch((err) => {
+      const myError = new Error(err);
+      myError.httpStatusCode = 500;
+      return next(myError);
+    });
+};
+exports.getCheckout = (req, res, next) => {
+  req.user
+    .populate("cart.items.productId")
+    .then((user) => {
+      let total = 0;
+      let products = user.cart.items;
+      products.forEach((p) => {
+        total += p.quantity * p.productId.price;
+      });
+      res.render("shop/checkout", {
+        docTitle: "Checkout",
+        path: "/checkout",
+        products: products,
+        total: total,
       });
     })
     .catch((err) => {
@@ -107,6 +131,7 @@ exports.postCart = (req, res, next) => {
       res.redirect("/cart");
     })
     .catch((err) => {
+      console.log(err);
       const myError = new Error(err);
       myError.httpStatusCode = 500;
       return next(myError);
@@ -125,10 +150,18 @@ exports.postDeleteCart = (req, res, next) => {
       return next(myError);
     });
 };
-exports.postOrderCreate = (req, res, next) => {
+exports.postOrderCreate = async (req, res, next) => {
+  const token = req.body.stripeToken;
+
+  let totalSum = 0;
+
   req.user
     .populate("cart.items.productId")
     .then((user) => {
+      user.cart.items.forEach((p) => {
+        totalSum += p.quantity * p.productId.price;
+      });
+
       const products = user.cart.items.map((i) => {
         return { quantity: i.quantity, product: { ...i.productId._doc } };
       });
@@ -139,12 +172,20 @@ exports.postOrderCreate = (req, res, next) => {
       return order.save();
     })
     .then((result) => {
+      const charge = stripe.charges.create({
+        amount: totalSum * 100,
+        currency: "usd",
+        description: "Demo order",
+        source: token,
+        metadata: { order_id: result._id.toString() },
+      });
       return req.user.clearCart();
     })
     .then((result) => {
       res.redirect("/orders");
     })
     .catch((err) => {
+      console.log(err);
       const myError = new Error(err);
       myError.httpStatusCode = 500;
       return next(myError);
